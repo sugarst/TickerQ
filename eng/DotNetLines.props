@@ -35,12 +35,12 @@
 
     <PropertyGroup Condition="'$(TickerQDotNetMajor)' == '10'">
         <TickerQNSecVersion>26.4.0</TickerQNSecVersion>
-        <TickerQDotNetMinimumVersion>10.0.0</TickerQDotNetMinimumVersion>
-        <TickerQPatchedMinimumVersion>10.0.13</TickerQPatchedMinimumVersion>
-        <TickerQNpgsqlEfVersion>10.0.0</TickerQNpgsqlEfVersion>
-        <TickerQMySqlEfVersion>10.0.1</TickerQMySqlEfVersion>
-        <TickerQOracleEfVersion>10.23.26300</TickerQOracleEfVersion>
-        <TickerQMicrotingEfVersion>10.0.8</TickerQMicrotingEfVersion>
+        <TickerQDotNetMinimumVersion>10.0.15</TickerQDotNetMinimumVersion>
+        <TickerQPatchedMinimumVersion>10.0.15</TickerQPatchedMinimumVersion>
+        <TickerQNpgsqlEfVersion>10.0.3</TickerQNpgsqlEfVersion>
+        <TickerQMySqlEfVersion>10.0.12</TickerQMySqlEfVersion>
+        <TickerQOracleEfVersion>10.23.26400</TickerQOracleEfVersion>
+        <TickerQMicrotingEfVersion>10.0.14</TickerQMicrotingEfVersion>
         <TickerQMicrotingNamespace>Microting</TickerQMicrotingNamespace>
     </PropertyGroup>
 

@@ -182,11 +182,9 @@ public class ProviderCompatibilityTests
     }
 #endif
 
-#if !NET10_0_OR_GREATER || NET11_0_OR_GREATER
     [Fact]
-    public void MySql_provider_outside_10x_reads_retry_intervals_through_a_json_converter()
+    public void MySql_provider_reads_retry_intervals_through_a_json_converter()
     {
-        // MySql.EntityFrameworkCore reads primitive collections back only in 10.x (see PrimitiveCollectionCompat).
         var model = DesignModel(b => b.UseMySQL("Server=localhost;Database=tickerq;User=u;Password=p"));
         var retryIntervals = model.FindEntityType(typeof(TimeTickerEntity))!.FindProperty(nameof(TimeTickerEntity.RetryIntervals))!;
 
@@ -197,7 +195,6 @@ public class ProviderCompatibilityTests
         Assert.Null(model.FindEntityType(typeof(TickerQ.Utilities.Models.CronChainNode)));
     }
 
-#endif
     [Fact]
     public void MySql_model_keeps_investigation_index_keys_within_the_innodb_limit()
     {

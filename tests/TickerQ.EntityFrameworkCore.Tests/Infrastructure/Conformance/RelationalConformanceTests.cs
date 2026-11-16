@@ -124,6 +124,7 @@ public sealed class RelationalConformanceTests
         };
         Assert.Equal(1, await provider.AddTimeTickers([job], CancellationToken.None));
         var cron = Cron(seedKey: null);
+        cron.RetryIntervals = [15, 90];
         cron.TimeZoneId = "Europe/Tirane";
         cron.CatchUpMode = CronCatchUpMode.RunLatest;
         cron.MissedExecutionAction = MissedExecutionAction.Skip;
@@ -147,6 +148,7 @@ public sealed class RelationalConformanceTests
 
         var storedCron = await provider.GetCronTickerById(cron.Id, CancellationToken.None);
         Assert.Equal(cron.Expression, storedCron.Expression);
+        Assert.Equal(cron.RetryIntervals, storedCron.RetryIntervals);
         Assert.Equal("Europe/Tirane", storedCron.TimeZoneId);
         Assert.Equal(CronCatchUpMode.RunLatest, storedCron.CatchUpMode);
         Assert.Equal(TimeSpan.FromSeconds(30), storedCron.MaximumLateness);

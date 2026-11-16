@@ -26,8 +26,9 @@ public sealed class EfCoreNodeFinalizationOutboxTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         _databasePath = Path.Combine(Path.GetTempPath(), $"tickerq-node-outbox-{Guid.NewGuid():N}.db");
+        // Pooled SQLite connections keep temporary database files open on Windows.
         _options = new DbContextOptionsBuilder<TestTickerQDbContext>()
-            .UseSqlite($"Data Source={_databasePath}")
+            .UseSqlite($"Data Source={_databasePath};Pooling=False")
             .Options;
         await using (var context = new TestTickerQDbContext(_options))
             await context.Database.EnsureCreatedAsync();
@@ -96,7 +97,7 @@ public sealed class EfCoreNodeFinalizationOutboxTests : IAsyncLifetime
         try
         {
             var options = new DbContextOptionsBuilder<TestTickerQDbContext>()
-                .UseSqlite($"Data Source={missingPath}").Options;
+                .UseSqlite($"Data Source={missingPath};Pooling=False").Options;
             var readiness = new EfCoreNodeFinalizationOutboxReadiness();
             var logger = new RecordingLogger<EfCoreNodeFinalizationOutboxReadinessProbe<TestTickerQDbContext>>();
             var services = new ServiceCollection()
@@ -153,7 +154,7 @@ public sealed class EfCoreNodeFinalizationOutboxTests : IAsyncLifetime
         try
         {
             var options = new DbContextOptionsBuilder<TestTickerQDbContext>()
-                .UseSqlite($"Data Source={partialPath}").Options;
+                .UseSqlite($"Data Source={partialPath};Pooling=False").Options;
             var readiness = new EfCoreNodeFinalizationOutboxReadiness();
             var logger = new RecordingLogger<EfCoreNodeFinalizationOutboxReadinessProbe<TestTickerQDbContext>>();
             await using var services = new ServiceCollection()

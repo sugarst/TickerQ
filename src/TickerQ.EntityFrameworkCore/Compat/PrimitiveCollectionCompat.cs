@@ -1,26 +1,19 @@
 using System;
-using Microsoft.EntityFrameworkCore;
-#if !NET10_0_OR_GREATER || NET11_0_OR_GREATER
 using System.Linq;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-#endif
 
 namespace TickerQ.EntityFrameworkCore.Compat;
 
 /// <summary>
-/// EF Core maps <c>int[]</c> (RetryIntervals) as a primitive collection stored as JSON text. Oracle's
-/// MySql.EntityFrameworkCore reads that JSON back only in its 10.x releases: 8.x and 9.x ask the reader for an
-/// int[] directly, and the 11.0 preview fails to convert it. On those lines TickerQ converts the column itself.
-/// The stored text is the same <c>[1,2,3]</c> JSON, so data and schema are unchanged. Revisit when
-/// MySql.EntityFrameworkCore 11.0 ships.
+/// Oracle's MySql.EntityFrameworkCore can return a JSON column as a string when EF reads an
+/// <c>int[]</c> retry interval collection. Map the collection as a scalar to deserialize that string.
+/// Existing values use the same <c>[1,2,3]</c> JSON format.
 /// </summary>
 internal static class PrimitiveCollectionCompat
 {
-#if NET10_0_OR_GREATER && !NET11_0_OR_GREATER
-    public static void Apply(ModelBuilder modelBuilder, string providerName, Func<Type, bool> isTickerQEntity) { }
-#else
     public static void Apply(ModelBuilder modelBuilder, string providerName, Func<Type, bool> isTickerQEntity)
     {
         if (!string.Equals(providerName, "MySql.EntityFrameworkCore", StringComparison.Ordinal))
@@ -52,10 +45,7 @@ internal static class PrimitiveCollectionCompat
     private static string Serialize(int[] value) => JsonSerializer.Serialize(value, IntArrayJsonContext.Default.Int32Array);
 
     private static int[] Deserialize(string json) => JsonSerializer.Deserialize(json, IntArrayJsonContext.Default.Int32Array);
-#endif
 }
 
-#if !NET10_0_OR_GREATER || NET11_0_OR_GREATER
 [System.Text.Json.Serialization.JsonSerializable(typeof(int[]))]
 internal sealed partial class IntArrayJsonContext : System.Text.Json.Serialization.JsonSerializerContext;
-#endif
