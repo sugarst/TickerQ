@@ -6,7 +6,9 @@ using Hangfire.InMemory;
 using Hangfire.States;
 using HangfireJob = Hangfire.Common.Job;
 using Quartz;
+#if !NET10_0_OR_GREATER
 using Quartz.Impl;
+#endif
 
 namespace TickerQ.Benchmarks.Comparisons;
 
@@ -37,6 +39,9 @@ public class JobCreationComparison
     private BackgroundJobClient _hangfireClient = null!;
     private InMemoryStorage _hangfireStorage = null!;
     private IScheduler _quartzScheduler = null!;
+#if NET10_0_OR_GREATER
+    private StandaloneSchedulerFactory? _quartzFactory;
+#endif
     private int _quartzJobCounter;
 
     [GlobalSetup]
@@ -47,7 +52,14 @@ public class JobCreationComparison
         _hangfireClient = new BackgroundJobClient(_hangfireStorage);
 
         // Quartz: RAM-only scheduler (default uses RAMJobStore)
+#if NET10_0_OR_GREATER
+        _quartzFactory = QuartzSchedulerBuilder
+            .Create(quartz => quartz.UseInMemoryStore().UseDefaultThreadPool(10))
+            .Build();
+        _quartzScheduler = _quartzFactory.GetScheduler().GetAwaiter().GetResult();
+#else
         _quartzScheduler = new StdSchedulerFactory().GetScheduler().GetAwaiter().GetResult();
+#endif
         _quartzScheduler.Start().GetAwaiter().GetResult();
     }
 
@@ -55,7 +67,11 @@ public class JobCreationComparison
     public void Cleanup()
     {
         _hangfireStorage?.Dispose();
+#if NET10_0_OR_GREATER
+        _quartzFactory?.Dispose();
+#else
         _quartzScheduler?.Shutdown(false).GetAwaiter().GetResult();
+#endif
     }
 
     // ── Hangfire: create Job object from expression (no storage) ──
@@ -169,6 +185,11 @@ public class JobCreationComparison
 
     public class SampleQuartzJob : IJob
     {
+#if NET10_0_OR_GREATER
+        public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
+            => ValueTask.CompletedTask;
+#else
         public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+#endif
     }
 }

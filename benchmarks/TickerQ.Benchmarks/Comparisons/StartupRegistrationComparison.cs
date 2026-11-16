@@ -5,7 +5,9 @@ using Hangfire;
 using Hangfire.InMemory;
 using HangfireJob = Hangfire.Common.Job;
 using Quartz;
+#if !NET10_0_OR_GREATER
 using Quartz.Impl;
+#endif
 using TickerQ.Utilities;
 using TickerQ.Utilities.Enums;
 
@@ -70,7 +72,14 @@ public class StartupRegistrationComparison
     [Benchmark(Description = "Quartz: Scheduler + schedule jobs")]
     public void Quartz_ScheduleJobs()
     {
+#if NET10_0_OR_GREATER
+        using var factory = QuartzSchedulerBuilder
+            .Create(quartz => quartz.UseInMemoryStore().UseDefaultThreadPool(10))
+            .Build();
+        var scheduler = factory.GetScheduler().GetAwaiter().GetResult();
+#else
         var scheduler = new StdSchedulerFactory().GetScheduler().GetAwaiter().GetResult();
+#endif
 
         for (int i = 0; i < JobCount; i++)
         {
@@ -86,13 +95,20 @@ public class StartupRegistrationComparison
             scheduler.ScheduleJob(job, trigger).GetAwaiter().GetResult();
         }
 
+#if !NET10_0_OR_GREATER
         scheduler.Shutdown(false).GetAwaiter().GetResult();
+#endif
     }
 
     public static void NoopMethod() { }
 
     public class NoopQuartzJob : IJob
     {
+#if NET10_0_OR_GREATER
+        public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
+            => ValueTask.CompletedTask;
+#else
         public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+#endif
     }
 }

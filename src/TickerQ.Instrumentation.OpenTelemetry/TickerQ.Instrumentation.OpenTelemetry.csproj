@@ -10,8 +10,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTelemetry" Version="[1.15.3,)" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="[1.15.3,)" />
+    <!-- OpenTelemetry 1.21.0 brings in System.Diagnostics.DiagnosticSource 11.0 on .NET 10. -->
+    <PackageReference Include="OpenTelemetry" Version="[1.20.1,)" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="[1.20.1,)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="$(DotNetAbstractionsVersion)" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="$(DotNetAbstractionsVersion)" />
   </ItemGroup>

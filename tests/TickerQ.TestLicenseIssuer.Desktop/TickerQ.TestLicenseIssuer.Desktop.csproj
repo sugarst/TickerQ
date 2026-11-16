@@ -7,7 +7,7 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="AtomUI.Desktop.Controls" Version="6.2.8" />
+    <PackageReference Include="AtomUI.Desktop.Controls" Version="6.2.15" />
     <PackageReference Include="NSec.Cryptography" Version="26.4.0" />
     <Compile Include="../Shared/Licensing/TestLicenseIssuer.cs" Link="TestLicenseIssuer.cs" />
   </ItemGroup>

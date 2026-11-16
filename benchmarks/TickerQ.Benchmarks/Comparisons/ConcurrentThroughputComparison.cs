@@ -5,7 +5,9 @@ using Hangfire;
 using Hangfire.InMemory;
 using Hangfire.States;
 using Quartz;
+#if !NET10_0_OR_GREATER
 using Quartz.Impl;
+#endif
 using HangfireJob = Hangfire.Common.Job;
 using TickerQ.Utilities;
 
@@ -26,6 +28,9 @@ public class ConcurrentThroughputComparison
     private BackgroundJobClient _hangfireClient = null!;
     private InMemoryStorage _hangfireStorage = null!;
     private IScheduler _quartzScheduler = null!;
+#if NET10_0_OR_GREATER
+    private StandaloneSchedulerFactory? _quartzFactory;
+#endif
     private int _quartzCounter;
 
     [Params(100, 1000)]
@@ -46,7 +51,14 @@ public class ConcurrentThroughputComparison
         _hangfireClient = new BackgroundJobClient(_hangfireStorage);
 
         // Quartz
+#if NET10_0_OR_GREATER
+        _quartzFactory = QuartzSchedulerBuilder
+            .Create(quartz => quartz.UseInMemoryStore().UseDefaultThreadPool(10))
+            .Build();
+        _quartzScheduler = _quartzFactory.GetScheduler().GetAwaiter().GetResult();
+#else
         _quartzScheduler = new StdSchedulerFactory().GetScheduler().GetAwaiter().GetResult();
+#endif
         _quartzScheduler.Start().GetAwaiter().GetResult();
     }
 
@@ -54,7 +66,11 @@ public class ConcurrentThroughputComparison
     public void Cleanup()
     {
         _hangfireStorage?.Dispose();
+#if NET10_0_OR_GREATER
+        _quartzFactory?.Dispose();
+#else
         _quartzScheduler?.Shutdown(false).GetAwaiter().GetResult();
+#endif
     }
 
     // ── TickerQ: parallel lookup + invoke ──
@@ -151,6 +167,11 @@ public class ConcurrentThroughputComparison
 
     public class NoopQuartzJob : IJob
     {
+#if NET10_0_OR_GREATER
+        public ValueTask Execute(IJobExecutionContext context, CancellationToken cancellationToken)
+            => ValueTask.CompletedTask;
+#else
         public Task Execute(IJobExecutionContext context) => Task.CompletedTask;
+#endif
     }
 }
