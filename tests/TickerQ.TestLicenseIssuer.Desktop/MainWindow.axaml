@@ -1,0 +1,15 @@
+<atom:Window xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:atom="https://atomui.net"
+             x:Class="TickerQ.TestLicenseIssuer.Desktop.MainWindow"
+             Title="TickerQ Test License Issuer" Width="540" MinWidth="400" SizeToContent="Height"
+             WindowStartupLocation="CenterScreen">
+    <StackPanel Margin="28" Spacing="16">
+        <TextBlock Text="Export a test certificate" FontSize="24" FontWeight="SemiBold" />
+        <TextBlock Text="Exports a 30-day evaluation fixture and its public key for TickerQ tests."
+                   TextWrapping="Wrap" />
+        <atom:Button x:Name="ExportButton" ButtonType="Primary" HorizontalAlignment="Left"
+                     Click="ExportAsync">Choose folder and export</atom:Button>
+        <SelectableTextBlock x:Name="ExportStatus" TextWrapping="Wrap" IsVisible="False" />
+    </StackPanel>
+</atom:Window>
