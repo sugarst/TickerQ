@@ -47,6 +47,7 @@
     <Project Path="tests/TickerQ.MongoDB.Tests/TickerQ.MongoDB.Tests.csproj" />
     <Project Path="tests/TickerQ.Integrations.Tests/TickerQ.Integrations.Tests.csproj" />
     <Project Path="tests/TickerQ.SourceGenerator.Tests/TickerQ.SourceGenerator.Tests.csproj" />
+    <Project Path="tests/TickerQ.TestLicenseIssuer.Desktop/TickerQ.TestLicenseIssuer.Desktop.csproj" />
     <Project Path="tests/TickerQ.Tests/TickerQ.Tests.csproj" />
     <Project Path="tests/TickerQ.Tests.DiscoveryFixture/TickerQ.Tests.DiscoveryFixture.csproj" />
   </Folder>
