@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <data name="WindowTitle" xml:space="preserve"><value>TickerQ 证书工具</value></data>
+  <data name="LanguageLabel" xml:space="preserve"><value>语言</value></data>
+  <data name="ServiceHeading" xml:space="preserve"><value>服务证书</value></data>
+  <data name="ServiceDescription" xml:space="preserve"><value>从 TickerQ 许可门户下载已签名的证书，再为各服务主机导出副本。</value></data>
+  <data name="OpenPortal" xml:space="preserve"><value>打开许可门户</value></data>
+  <data name="ExportService" xml:space="preserve"><value>导出门户证书</value></data>
+  <data name="TestHeading" xml:space="preserve"><value>本地测试证书</value></data>
+  <data name="TestDescription" xml:space="preserve"><value>导出本地集成测试所需的证书和配套公钥文件。</value></data>
+  <data name="ExpirationLabel" xml:space="preserve"><value>到期时间（北京时间，UTC+8）</value></data>
+  <data name="ExportTest" xml:space="preserve"><value>生成并导出测试证书</value></data>
+  <data name="PortalFallback" xml:space="preserve"><value>请在浏览器中打开许可门户：{0}</value></data>
+  <data name="PortalFailed" xml:space="preserve"><value>无法打开许可门户。{0}</value></data>
+  <data name="InvalidExpiration" xml:space="preserve"><value>请选择未来的日期和时间（北京时间）。</value></data>
+  <data name="DefaultExportDirectoryUnavailable" xml:space="preserve"><value>无法找到当前用户的默认导出目录。</value></data>
+  <data name="TestExportTitle" xml:space="preserve"><value>测试证书已导出</value></data>
+  <data name="BeijingResultLabel" xml:space="preserve"><value>到期时间（北京时间）</value></data>
+  <data name="UtcResultLabel" xml:space="preserve"><value>证书到期时间（UTC）</value></data>
+  <data name="OpenExportFolder" xml:space="preserve"><value>打开文件夹</value></data>
+  <data name="OpenExportFolderError" xml:space="preserve"><value>无法打开导出文件夹。</value></data>
+  <data name="ExportFailed" xml:space="preserve"><value>导出失败。{0}</value></data>
+  <data name="ServiceFileTitle" xml:space="preserve"><value>选择从许可门户下载的证书</value></data>
+  <data name="CertificateFileType" xml:space="preserve"><value>TickerQ 证书</value></data>
+  <data name="InvalidServiceFile" xml:space="preserve"><value>请选择从门户下载的本地 .tqlicense 文件。</value></data>
+  <data name="ServiceFolderTitle" xml:space="preserve"><value>选择门户证书的导出文件夹</value></data>
+  <data name="CertificateExists" xml:space="preserve"><value>所选文件夹中已有 {0}。请选择其他文件夹。</value></data>
+  <data name="ServiceExported" xml:space="preserve"><value>已将证书复制到&#10;{0}&#10;请将证书放入服务的内容根目录，或通过 UseLicense 指定其路径，然后重启服务。</value></data>
+  <data name="LocalFolderRequired" xml:space="preserve"><value>请选择本地磁盘上的文件夹。</value></data>
+</root>

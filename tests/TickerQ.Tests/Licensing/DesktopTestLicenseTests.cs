@@ -31,11 +31,13 @@ public sealed class DesktopTestLicenseTests : IDisposable
 
     public void Dispose() => _output.Delete(recursive: true);
 
-    [Fact]
-    public async Task Exported_fixture_is_rejected_by_the_default_trust_store()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task Exported_fixture_is_rejected_by_the_default_trust_store(bool customTerm)
     {
         var now = DateTimeOffset.UtcNow;
-        var directory = await TestLicenseIssuer.ExportAsync(_output.FullName, now);
+        var directory = await TestLicenseIssuer.ExportAsync(_output.FullName, now, customTerm ? now.AddDays(45) : null);
         var state = LicenseCertificateReader.Read(TestLicenseIssuer.CertificateFileName, directory, now);
 
         Assert.Equal(TickerQLicenseStatus.Invalid, state.Status);
@@ -44,9 +46,32 @@ public sealed class DesktopTestLicenseTests : IDisposable
     }
 
     [Fact]
+    public async Task Exported_fixture_honors_the_selected_expiration()
+    {
+        var issuedAt = new DateTimeOffset(2026, 1, 2, 3, 4, 0, TimeSpan.Zero);
+        var expiresAt = issuedAt.AddDays(45).AddMinutes(17);
+        var directory = await TestLicenseIssuer.ExportAsync(_output.FullName, issuedAt, expiresAt);
+        var authority = TestLicenseIssuer.ReadAuthority(directory);
+
+        var before = LicenseCertificateReader.Read(TestLicenseIssuer.CertificateFileName, directory,
+            expiresAt.AddSeconds(-1), authority.Resolve);
+        var after = LicenseCertificateReader.Read(TestLicenseIssuer.CertificateFileName, directory,
+            expiresAt, authority.Resolve);
+
+        Assert.Equal(expiresAt, before.ExpiresAt);
+        Assert.Equal(TickerQLicenseStatus.Expiring, before.Status);
+        Assert.Equal(TickerQLicenseStatus.Expired, after.Status);
+        Assert.True(after.ExecutionAllowed);
+    }
+
+    [Fact]
     public async Task Exported_fixture_runs_time_and_cron_jobs_and_keeps_viewer_writes_forbidden()
     {
-        var directory = await TestLicenseIssuer.ExportAsync(_output.FullName, DateTimeOffset.UtcNow);
+        var now = DateTimeOffset.UtcNow;
+        var configuredDirectory = Environment.GetEnvironmentVariable("TICKERQ_TEST_LICENSE_DIRECTORY");
+        var directory = string.IsNullOrWhiteSpace(configuredDirectory)
+            ? await TestLicenseIssuer.ExportAsync(_output.FullName, now, now.AddDays(45))
+            : Path.GetFullPath(configuredDirectory);
         var builder = WebApplication.CreateBuilder(new WebApplicationOptions
         {
             Args = [],
@@ -74,7 +99,7 @@ public sealed class DesktopTestLicenseTests : IDisposable
         {
             var license = app.Services.GetRequiredService<TickerQLicenseStateProvider>().Current;
             Assert.True(license.ExecutionAllowed, license.Message);
-            Assert.True(license.IsEvaluation);
+            Assert.Contains(license.Status, new[] { TickerQLicenseStatus.Active, TickerQLicenseStatus.Expiring });
             Assert.Equal(TestLicenseIssuer.KeyId, license.KeyId);
 
             using var viewer = app.GetTestClient();

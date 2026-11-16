@@ -17,12 +17,19 @@ internal static class TestLicenseIssuer
         WriteIndented = true,
     };
 
-    public static async Task<string> ExportAsync(string parentDirectory, DateTimeOffset issuedAt)
+    public static async Task<string> ExportAsync(
+        string parentDirectory, DateTimeOffset issuedAt, DateTimeOffset? expiresAt = null)
     {
         const int schemaVersion = 4;
+        var runtimeExpiresAt = expiresAt ?? issuedAt.AddDays(30);
+        if (runtimeExpiresAt <= issuedAt)
+            throw new ArgumentOutOfRangeException(nameof(expiresAt), "Expiration must be later than issuance.");
+
         var licenseId = Guid.NewGuid();
         var algorithm = SignatureAlgorithm.Ed25519;
         using var signingKey = Key.Create(algorithm);
+        // Evaluation terms are fixed at 30 days. A subscription-shaped test payload supports custom dates.
+        var customTerm = expiresAt.HasValue;
         var payload = JsonSerializer.SerializeToUtf8Bytes(new
         {
             schemaVersion,
@@ -31,9 +38,10 @@ internal static class TestLicenseIssuer
             workspaceId = Guid.NewGuid(),
             workspaceName = "TickerQ local test fixture",
             plan = 1, // Business
-            licenseKind = 2, // Evaluation
+            licenseKind = customTerm ? 0 : 2, // Full or Evaluation
             issuedAt,
-            runtimeExpiresAt = issuedAt.AddDays(30),
+            runtimeExpiresAt,
+            anchoredMinorLine = customTerm ? "5.x" : null,
         }, JsonOptions);
         var certificate = JsonSerializer.SerializeToUtf8Bytes(new
         {

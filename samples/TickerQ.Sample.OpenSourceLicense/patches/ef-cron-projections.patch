@@ -1,0 +1,135 @@
+diff --git a/src/TickerQ.EntityFrameworkCore/Infrastructure/BasePersistenceProvider.cs b/src/TickerQ.EntityFrameworkCore/Infrastructure/BasePersistenceProvider.cs
+index 9152e32..d9c53c3 100644
+--- a/src/TickerQ.EntityFrameworkCore/Infrastructure/BasePersistenceProvider.cs
++++ b/src/TickerQ.EntityFrameworkCore/Infrastructure/BasePersistenceProvider.cs
+@@ -23,6 +23,7 @@ using TickerQ.Utilities.Enums;
+ using TickerQ.Utilities.Infrastructure;
+ using TickerQ.Utilities.Interfaces;
+ using TickerQ.Utilities.Models;
++using CronMappings = TickerQ.Utilities.Infrastructure.MappingExtensions;
+ 
+ namespace TickerQ.EntityFrameworkCore.Infrastructure;
+ 
+@@ -2318,7 +2319,7 @@ internal abstract class BasePersistenceProvider<TDbContext, TTimeTicker, TCronTi
+                     .AsNoTracking()
+                     .Where(x => x.ApplicationNamespaceKey == _runtimePartitionKey &&
+                                 x.IsEnabled && !x.IsSystemPaused)
+-                    .Select(MappingExtensions.ForCronTickerExpressions<CronTickerEntity>())
++                    .Select(CronMappings.ForCronTickerExpressions<TCronTicker>())
+                     .ToArrayAsync(ct)
+                     .ConfigureAwait(false);
+             },
+@@ -2333,7 +2334,7 @@ internal abstract class BasePersistenceProvider<TDbContext, TTimeTicker, TCronTi
+         return await dbContext.Set<TCronTicker>()
+             .AsNoTracking()
+             .Where(x => x.ApplicationNamespaceKey == _runtimePartitionKey && x.IsEnabled)
+-            .Select(MappingExtensions.ForCronTickerExpressions<CronTickerEntity>())
++            .Select(CronMappings.ForCronTickerExpressions<TCronTicker>())
+             .ToArrayAsync(cancellationToken).ConfigureAwait(false);
+     }
+     #endregion
+@@ -2423,7 +2424,7 @@ internal abstract class BasePersistenceProvider<TDbContext, TTimeTicker, TCronTi
+                             x.DefinitionRevision == x.CronTicker.DefinitionRevision)
+                 .Where(x => x.Status == TickerStatus.Idle || x.Status == TickerStatus.Queued)
+                 .Where(x => x.ExecutionTime <= fallbackThreshold)  // Only tasks older than 1 second
+-                .Select(MappingExtensions.ForQueueCronTickerOccurrence<CronTickerOccurrenceEntity<TCronTicker>, TCronTicker>())
++                .Select(CronMappings.ForQueueCronTickerOccurrence<CronTickerOccurrenceEntity<TCronTicker>, TCronTicker>())
+                 .ToArrayAsync(ct).ConfigureAwait(false);
+ 
+             foreach (var cronTickerOccurrence in cronTickersToUpdate)
+@@ -2620,7 +2621,7 @@ internal abstract class BasePersistenceProvider<TDbContext, TTimeTicker, TCronTi
+             .Where(x => x.ExecutionTime >= mainSchedulerThreshold)  // Only items within the 1-second main scheduler window
+             .WhereCanAcquire(_lockHolder)
+             .OrderBy(x => x.ExecutionTime)
+-            .Select(MappingExtensions.ForLatestQueuedCronTickerOccurrence<CronTickerOccurrenceEntity<TCronTicker>, TCronTicker>())
++            .Select(CronMappings.ForLatestQueuedCronTickerOccurrence<CronTickerOccurrenceEntity<TCronTicker>, TCronTicker>())
+             .FirstOrDefaultAsync(cancellationToken)
+             .ConfigureAwait(false);
+     }
+diff --git a/src/TickerQ.EntityFrameworkCore/Infrastructure/MappingExtensions.cs b/src/TickerQ.EntityFrameworkCore/Infrastructure/MappingExtensions.cs
+index 582b4cc..a2169cb 100644
+--- a/src/TickerQ.EntityFrameworkCore/Infrastructure/MappingExtensions.cs
++++ b/src/TickerQ.EntityFrameworkCore/Infrastructure/MappingExtensions.cs
+@@ -10,21 +10,6 @@ namespace TickerQ.EntityFrameworkCore.Infrastructure
+ {
+     internal static class MappingExtensions
+     {
+-        public static Expression<Func<TCronTicker, CronTickerEntity>> ForCronTickerExpressions<TCronTicker>()
+-            where TCronTicker : CronTickerEntity, new()
+-            => e => new CronTickerEntity
+-            {
+-                Id = e.Id,
+-                Expression = e.Expression,
+-                Function = e.Function,
+-                RequestContractVersion = e.RequestContractVersion,
+-                RequestContractFingerprint = e.RequestContractFingerprint,
+-                RetryIntervals = e.RetryIntervals,
+-                Retries = e.Retries,
+-                TimeoutSeconds = e.TimeoutSeconds,
+-                IsEnabled = e.IsEnabled
+-            };
+-
+         internal static Expression<Func<TTimeTicker, TimeTickerEntity>> ForQueueTimeTickers<TTimeTicker>()
+             where TTimeTicker : TimeTickerEntity<TTimeTicker>, new()
+             => e => new TimeTickerEntity
+@@ -82,53 +67,6 @@ namespace TickerQ.EntityFrameworkCore.Infrastructure
+                 }).ToArray()
+             };
+ 
+-        internal static Expression<Func<TCronTickerOccurrence, CronTickerOccurrenceEntity<TCronTicker>>>
+-            ForQueueCronTickerOccurrence<TCronTickerOccurrence, TCronTicker>()
+-            where TCronTicker : CronTickerEntity, new()
+-            where TCronTickerOccurrence : CronTickerOccurrenceEntity<TCronTicker>, new()
+-            => e => new CronTickerOccurrenceEntity<TCronTicker>
+-            {
+-                Id = e.Id,
+-                UpdatedAt = e.UpdatedAt,
+-                CronTickerId = e.CronTickerId,
+-                ExecutionTime = e.ExecutionTime,
+-                AcquisitionToken = e.AcquisitionToken,
+-                CronTicker = new TCronTicker
+-                {
+-                    Id = e.CronTicker.Id,
+-                    Function = e.CronTicker.Function,
+-                    RequestContractVersion = e.CronTicker.RequestContractVersion,
+-                    RequestContractFingerprint = e.CronTicker.RequestContractFingerprint,
+-                    RetryIntervals = e.CronTicker.RetryIntervals,
+-                    Retries = e.CronTicker.Retries,
+-                    TimeoutSeconds = e.CronTicker.TimeoutSeconds
+-                }
+-            };
+-
+-        internal static Expression<Func<TCronTickerOccurrence, CronTickerOccurrenceEntity<TCronTicker>>>
+-            ForLatestQueuedCronTickerOccurrence<TCronTickerOccurrence, TCronTicker>()
+-            where TCronTicker : CronTickerEntity, new()
+-            where TCronTickerOccurrence : CronTickerOccurrenceEntity<TCronTicker>, new()
+-            => e => new CronTickerOccurrenceEntity<TCronTicker>
+-            {
+-                Id = e.Id,
+-                CreatedAt = e.CreatedAt,
+-                CronTickerId = e.CronTickerId,
+-                ExecutionTime = e.ExecutionTime,
+-                AcquisitionToken = e.AcquisitionToken,
+-                CronTicker = new TCronTicker
+-                {
+-                    Id = e.CronTicker.Id,
+-                    Function = e.CronTicker.Function,
+-                    RequestContractVersion = e.CronTicker.RequestContractVersion,
+-                    RequestContractFingerprint = e.CronTicker.RequestContractFingerprint,
+-                    Expression = e.CronTicker.Expression,
+-                    RetryIntervals = e.CronTicker.RetryIntervals,
+-                    Retries = e.CronTicker.Retries,
+-                    TimeoutSeconds = e.CronTicker.TimeoutSeconds
+-                }
+-            };
+-
+         internal static void UpdateCronTickerOccurrence<TCronTicker>(
+             this UpdateSettersBuilder<CronTickerOccurrenceEntity<TCronTicker>> setters,
+             InternalFunctionContext functionContext, DateTime? leaseUntil = null)
+@@ -319,4 +257,4 @@ namespace TickerQ.EntityFrameworkCore.Infrastructure
+             setters.SetProperty(x => x.UpdatedAt, updatedAt);
+         }
+     }
+-}
+\ No newline at end of file
++}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <data name="WindowTitle" xml:space="preserve"><value>TickerQ Certificates</value></data>
+  <data name="LanguageLabel" xml:space="preserve"><value>Language</value></data>
+  <data name="ServiceHeading" xml:space="preserve"><value>Service certificate</value></data>
+  <data name="ServiceDescription" xml:space="preserve"><value>Download a signed certificate from the TickerQ licensing portal. Export a copy for each service host.</value></data>
+  <data name="OpenPortal" xml:space="preserve"><value>Open licensing portal</value></data>
+  <data name="ExportService" xml:space="preserve"><value>Export a portal certificate</value></data>
+  <data name="TestHeading" xml:space="preserve"><value>Local test certificate</value></data>
+  <data name="TestDescription" xml:space="preserve"><value>Export the certificate and its test authority for local integration tests.</value></data>
+  <data name="ExpirationLabel" xml:space="preserve"><value>Expiration (Beijing time, UTC+8)</value></data>
+  <data name="ExportTest" xml:space="preserve"><value>Generate and export test certificate</value></data>
+  <data name="PortalFallback" xml:space="preserve"><value>Open the licensing portal in your browser: {0}</value></data>
+  <data name="PortalFailed" xml:space="preserve"><value>Could not open the licensing portal. {0}</value></data>
+  <data name="InvalidExpiration" xml:space="preserve"><value>Select a future expiration in Beijing time.</value></data>
+  <data name="DefaultExportDirectoryUnavailable" xml:space="preserve"><value>The default export folder is unavailable for this user.</value></data>
+  <data name="TestExportTitle" xml:space="preserve"><value>Test certificate exported</value></data>
+  <data name="BeijingResultLabel" xml:space="preserve"><value>Beijing expiry (UTC+8)</value></data>
+  <data name="UtcResultLabel" xml:space="preserve"><value>Certificate expiry (UTC)</value></data>
+  <data name="OpenExportFolder" xml:space="preserve"><value>Open folder</value></data>
+  <data name="OpenExportFolderError" xml:space="preserve"><value>Could not open the export folder.</value></data>
+  <data name="ExportFailed" xml:space="preserve"><value>Export failed. {0}</value></data>
+  <data name="ServiceFileTitle" xml:space="preserve"><value>Select the certificate downloaded from the licensing portal</value></data>
+  <data name="CertificateFileType" xml:space="preserve"><value>TickerQ certificate</value></data>
+  <data name="InvalidServiceFile" xml:space="preserve"><value>Select a local .tqlicense file downloaded from the portal.</value></data>
+  <data name="ServiceFolderTitle" xml:space="preserve"><value>Choose where to export the portal certificate</value></data>
+  <data name="CertificateExists" xml:space="preserve"><value>{0} already exists in the selected folder. Choose a different folder.</value></data>
+  <data name="ServiceExported" xml:space="preserve"><value>Copied the certificate to&#10;{0}&#10;Deploy it to the service content root or configure UseLicense with its path, then restart the service.</value></data>
+  <data name="LocalFolderRequired" xml:space="preserve"><value>Choose a folder on a local drive.</value></data>
+</root>
